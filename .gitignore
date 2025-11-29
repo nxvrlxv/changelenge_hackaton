@@ -4,7 +4,7 @@ app/models/__pycache__/
 app/routers/__pycache__/
 app/schemas/__pycache__/
 app/another/__pycache__/
-changelenge_hackaton/uploads
-:sqlite.db
-.gitignore
-psb/
+changelenge_hackaton/uploads/
+changelenge_hackaton/:sqlite.db
+changelenge_hackaton/.gitignore
+changelenge_hackaton/psb/
