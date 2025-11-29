@@ -49,3 +49,10 @@ class Task(Base):
     course = relationship("Course", back_populates="tasks")
 
 
+#ответы студентов
+class Answer(Base):
+    __tablename__ = "answers"
+
+    answer_id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    task_id
