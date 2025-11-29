@@ -8,9 +8,11 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    email = Column(String, primary_key=True, nullable=False)
+    password = Column(String, nullable=False)
     firstname = Column(String, nullable=False)
     lastname = Column(String, nullable=False)
+    
     role = Column(String, nullable=False)
 
     answers = relationship("Answer", back_populates="student")
@@ -59,7 +61,7 @@ class Answer(Base):
 
     id = Column(Integer, primary_key=True)
     task_id = Column(Integer, ForeignKey("tasks.task_id"), nullable=False)
-    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("users.email"), nullable=False)
     
     file_url = Column(String(500), nullable=False)      
     version = Column(Integer, default=1)                

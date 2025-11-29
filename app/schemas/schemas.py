@@ -15,7 +15,7 @@ class MaterialResponse(_Base):
     url: str
 
 class AnswerResponse(_Base):
-    answer_id: int
+    id: int
     task_id: int
     file_url: str
     version: int = 1
@@ -36,3 +36,11 @@ class CourseResponse(_Base):
     description: str
     materials: List[MaterialResponse] = []
     tasks: List[TaskResponse] = []
+
+class UserResponse(_Base):
+    email: str
+    password: str
+    firstname: str
+    lastname : str
+    role: str
+    answers: List[AnswerResponse] = []

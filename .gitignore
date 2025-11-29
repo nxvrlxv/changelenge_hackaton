@@ -3,3 +3,8 @@ __pycache__/
 app/models/__pycache__/
 app/routers/__pycache__/
 app/schemas/__pycache__/
+app/another/__pycache__/
+changelenge_hackaton/uploads
+:sqlite.db
+.gitignore
+psb/
