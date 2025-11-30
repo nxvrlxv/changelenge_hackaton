@@ -6,8 +6,6 @@ from enum import Enum
 class _Base(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-
-
 class MaterialResponse(_Base):
     mat_id: int
     course_id: int
@@ -36,3 +34,12 @@ class CourseResponse(_Base):
     description: str
     materials: List[MaterialResponse] = []
     tasks: List[TaskResponse] = []
+
+class UserResponse(_Base):
+    email: str
+    password: str
+    firstname: str
+    lastname : str
+    role: str
+    answers: List[AnswerResponse] = []
+    courses: List[CourseResponse] = []
