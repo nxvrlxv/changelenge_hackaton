@@ -6,16 +6,7 @@ from enum import Enum
 class _Base(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-# class Role (str, Enum):
-#     student = "STUDENT"
-#     teacher = "TEACHER"
 
-# class Student(_Base):
-#     student_id: int
-#     firstname: str
-#     lastname: str
-#     role: Role 
-#     answers: Optional[List[str]] = None
 
 class MaterialResponse(_Base):
     mat_id: int
@@ -39,7 +30,7 @@ class TaskResponse(_Base):
     attachment_url: Optional[str] = None
     answers: Optional[List[AnswerResponse]] = []
 
-class Course(_Base):
+class CourseResponse(_Base):
     course_id: int
     title: str
     description: str
