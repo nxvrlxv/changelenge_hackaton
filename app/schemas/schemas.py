@@ -15,6 +15,7 @@ class MaterialResponse(_Base):
 class AnswerResponse(_Base):
     answer_id: int
     task_id: int
+    student_id: str
     file_url: str
     version: int = 1
     submitted_at: datetime
@@ -43,3 +44,34 @@ class UserResponse(_Base):
     role: str
     answers: List[AnswerResponse] = []
     courses: List[CourseResponse] = []
+
+class AnswerCreate(_Base):
+    task_id: int
+    student_id: str
+    file_url: str
+    version: int
+    submitted_at: datetime
+    score: int | None = None
+
+class progressBar(_Base):
+    progress: float
+    progress_display: str
+    progress_bar: str
+    tasks_total: int
+    tasks_completed: int
+
+class AnswerScoreResponse(BaseModel):
+    answer_id: int
+    version: int
+    score: int
+    teacher_comment: Optional[str]
+
+class TaskWithScoreResponse(BaseModel):
+    task_id: int
+    task_title: str
+    answer: AnswerScoreResponse
+
+class CourseWithScoresResponse(BaseModel):
+    course_id: int
+    course_title: str
+    tasks: List[TaskWithScoreResponse]

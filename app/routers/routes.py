@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from database import get_db
-from app.models.models import Course, Material, Task, Answer, User
-from app.schemas.schemas import AnswerResponse, CourseResponse, UserResponse
-from app.another.proc import is_valid_email
+from app.models.models import Course, Material, Task, Answer, User, enrollments
+from app.schemas.schemas import AnswerResponse, CourseResponse, UserResponse, AnswerCreate, CourseWithScoresResponse
+from app.another.proc import is_valid_email, get_student_scores_by_course, format_student_scores
 import shutil
 import os
 from datetime import datetime
 
 router = APIRouter(prefix="/student", tags=["Студент"])
 @router.get("/courses", response_model=list[CourseResponse])
-def get_my_courses(db: Session = Depends(get_db)):
+def get_all_courses(db: Session = Depends(get_db)):
     courses = db.query(Course).all()
     
     if not courses:
@@ -33,6 +33,10 @@ def get_my_courses(db: Session = Depends(get_db)):
     
 
     return courses
+@router.get("/my_courses", response_model=list[CourseResponse])
+def get_my_courses(user_email: str, db:Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == user_email).first()
+    return user.courses
 
 @router.put("/get_courses", response_model=UserResponse)
 def get_some_cources(user_email: str, course_id: int, db: Session = Depends(get_db)):
@@ -45,27 +49,12 @@ def get_some_cources(user_email: str, course_id: int, db: Session = Depends(get_
     db.commit()
     return user
 
-@router.get("/courses/{course_id}", response_model=CourseResponse)
-def get_course_detail(course_id: int, user_id: int,  db: Session = Depends(get_db)):
-    course = db.query(Course).filter(Course.course_id == course_id).first()
-    tasks_count = len(course.tasks)
-    answers = db.query(Answer).filter(Answer.student_id == user_id, Answer.task_id in course.tasks).all()
-    count_answers = len(answers)
-    progress = round(count_answers / tasks_count * 100, 2)
-
-    if not course:
-        raise HTTPException(404, "Курс не найден")
-    return course
-
-
-@router.get("/tasks/{task_id}/my-answers", response_model=list[AnswerResponse])
-def get_my_answers(task_id: int, db: Session = Depends(get_db)):
-    answers = db.query(Answer).filter(Answer.task_id == task_id, Answer.student_id == 1).order_by(Answer.version).all()
-    if answers:
-        answers[-1].score = 95
+@router.get("/tasks/{task_id}/my-answers")
+def get_my_answers(task_id: int, user_id: str, db: Session = Depends(get_db)):
+    answers = db.query(Answer).filter(Answer.task_id == task_id, Answer.student_id == user_id).order_by(Answer.version).all()
     return answers
 
-@router.post("/answers", response_model=AnswerResponse)
+@router.post("/answers", response_model=AnswerCreate)
 async def submit_homework(
     task_id: int,
     user_email: str,
@@ -83,7 +72,7 @@ async def submit_homework(
     last_version = db.query(Answer).filter(Answer.task_id == task_id, Answer.student_id == user_email).count()
     new_version = last_version + 1
 
-    answer = AnswerResponse(
+    answer = Answer(
         task_id=task_id,
         student_id=user_email,  
         file_url=f"/uploads/{filename}",
@@ -119,7 +108,6 @@ async def reg_user(
     lastname=lastname,
     role = 'student',
     answers = []
-
     )
 
     db.add(user)
@@ -137,3 +125,22 @@ def get_student(email, password, db: Session = Depends(get_db)):
          raise HTTPException(status_code=400, detail="Вы ввели неверный пароль")
     else:
         return user
+
+
+@router.get(
+    "/students/{student_email}/scores_by_course",
+    response_model=CourseWithScoresResponse,
+    summary="Получить оценки студента по курсам"
+)
+async def get_student_scores_by_course_endpoint(
+    student_email: str,
+    db: Session = Depends(get_db),
+):
+    # Получаем данные из базы
+    results = get_student_scores_by_course(student_email, db)
+    if not results:
+        raise HTTPException(status_code=404, detail="Нет данных об оценках для этого студента")
+
+    # Форматируем результат
+    formatted_results = format_student_scores(results)
+    return formatted_results
